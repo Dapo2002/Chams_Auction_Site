@@ -5,7 +5,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['chams-auction-site.onrender.com', 'localhost', '127.0.0.1']
 SECRET_KEY = 'django-insecure-change-me-to-something-random-for-local-dev'
 # LOGIN_URL = '/admin/login/'
 
