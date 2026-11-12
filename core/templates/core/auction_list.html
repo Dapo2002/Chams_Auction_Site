@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Active Asset Auctions</h2>
+<div class="row">
+    {% for asset in active_assets %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if asset.image %}
+                    <img src="{{ asset.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ asset.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-2">{{ asset.get_condition_display }}</span>
+                    <h5 class="card-title">{{ asset.title }}</h5>
+                    <p class="card-text text-muted">{{ asset.description|truncatewords:20 }}</p>
+                    <hr>
+                    <p class="mb-1">Highest Bid: <strong class="text-success">₦{{ asset.current_highest_bid }}</strong></p>
+                    <p class="text-danger small">Ends: {{ asset.end_time|date:"M d, Y H:i" }}</p>
+                    <a href="{% url 'auction_detail' asset.pk %}" class="btn btn-primary w-100">View & Place Bid</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-muted">No active auctions at the moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}

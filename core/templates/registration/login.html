@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h3 class="text-center fw-bold mb-4" style="color: #0B6623;">Staff Login</h3>
+
+                {% if form.errors %}
+                    <div class="alert alert-danger">Invalid username or password. Please try again.</div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Username</label>
+                        <input type="text" name="username" autofocus maxlength="150" required id="id_username" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Password</label>
+                        <input type="password" name="password" required id="id_password" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-chams w-100 py-2 fw-bold" style="background-color: #0B6623; color: white;">Log In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
