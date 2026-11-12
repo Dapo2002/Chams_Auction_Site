@@ -63,6 +63,11 @@ class Asset(models.Model):
   def is_closed(self):
     return timezone.now() >= self.end_time or not self.is_active
 
+  show_bids = models.BooleanField(
+    default=True,
+    help_text="Check to show highest bid and bid history on the frontend. Uncheck to hide them (Blind Auction mode)."
+  )
+
 
 class Bid(models.Model):
   asset = models.ForeignKey(
@@ -79,14 +84,22 @@ class Bid(models.Model):
     if self.asset.is_closed:
       raise ValidationError('This auction is already closed.')
 
-    current_high = self.asset.current_highest_bid
-    min_required = current_high + self.asset.min_increment
+    # Conditional validation based on Open vs Blind auction switch
+    if self.asset.show_bids:
+      current_high = self.asset.current_highest_bid
+      min_required = current_high + self.asset.min_increment
 
-    if self.amount < min_required:
-      raise ValidationError(
-          f'Bid must be at least ₦{min_required} (Current: ₦{current_high} +'
-          f' Min Inc: ₦{self.asset.min_increment})'
-      )
+      if self.amount < min_required:
+        raise ValidationError(
+            f'Bid must be at least ₦{min_required} (Current: ₦{current_high} +'
+            f' Min Inc: ₦{self.asset.min_increment})'
+        )
+    else:
+      # Blind auction mode: only check against the starting price
+      if self.amount < self.asset.starting_price:
+        raise ValidationError(
+            f'Bid must be at least the starting price (₦{self.asset.starting_price})'
+        )
 
   def save(self, *args, **kwargs):
     self.full_clean()

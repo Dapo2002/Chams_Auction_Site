@@ -16,6 +16,7 @@ class AssetAdmin(admin.ModelAdmin):
       'current_highest_bid',
       'end_time',
       'is_active',
+      'show_bids',
   )
   list_filter = ('category', 'condition', 'is_active')
   search_fields = ('title', 'description')

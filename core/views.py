@@ -35,7 +35,6 @@ def auction_list(request):
 
 
 @login_required
-@login_required
 def auction_detail(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     bids = asset.bids.all().order_by('-amount')
@@ -45,23 +44,38 @@ def auction_detail(request, pk):
             messages.error(request, 'This auction has ended.')
             return redirect('auction_detail', pk=pk)
 
-        try:
+       # try:
             # Convert input to float for numerical comparison
-            amount = float(request.POST.get('amount', 0))
+        amount = float(request.POST.get('amount', 0))
 
-            # Ensure the bid is strictly higher than the current highest bid
-            if amount <= float(asset.current_highest_bid):
-                messages.error(request,
-                               f'Your bid must be higher than the current highest bid (₦{asset.current_highest_bid}).')
-            else:
-                Bid.objects.create(asset=asset, user=request.user, amount=amount)
-                messages.success(request, 'Bid placed successfully!')
+            # Dynamic validation based on Open vs Blind auction switch
+        if asset.show_bids:
+            min_required = float(asset.current_highest_bid) if asset.current_highest_bid else float(asset.starting_price)
+            if amount <= min_required:
+                messages.error(
+                    request,
+                    f'Your bid must be higher than the current highest bid (₦{min_required:,.2f}).'
+                )
+                return redirect('auction_detail', pk=pk)
+        else:
+                # Blind auction mode: must be at least the starting price
+            min_required = float(asset.starting_price)
+            if amount < min_required:
+                messages.error(
+                    request,
+                    f'Your bid must be at least the starting price (₦{min_required:,.2f}).'
+                )
                 return redirect('auction_detail', pk=pk)
 
-        except ValueError:
-            messages.error(request, 'Please enter a valid numeric bid amount.')
-        except Exception:
-            messages.error(request, 'Invalid bid submission. Please try again.')
+            # Save the valid bid
+        Bid.objects.create(asset=asset, user=request.user, amount=amount)
+        messages.success(request, 'Bid placed successfully!')
+        return redirect('auction_detail', pk=pk)
+
+        #except ValueError:
+        messages.error(request, 'Please enter a valid numeric bid amount.')
+        #except Exception:
+        messages.error(request, 'Invalid bid submission. Please try again.')
 
     return render(
         request,
